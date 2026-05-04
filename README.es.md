@@ -17,7 +17,14 @@ Este proyecto es un sistema de overlay profesional para retransmisiones de Rocke
 
 ## Capturas de pantalla
 
-capturas/screenshots.png
+![Overlay 1](screenshots/overlay1.png)
+![Overlay 2](screenshots/overlay2.png)
+![Overlay 3](screenshots/overlay3.png)
+
+<p align="center">
+  <img src="screenshots/control-panel1.png" width="48%" />
+  <img src="screenshots/control-panel2.png" width="48%" />
+</p>
 
 ## Configuración para streaming
 
