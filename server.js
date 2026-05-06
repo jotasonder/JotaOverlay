@@ -18,6 +18,8 @@ let stateFile;
 let state = {
   view: 'hud',              // 'hud' | 'scoreboard' | 'goal'
   eventName: 'ROCKET LEAGUE TOURNAMENT',
+  fontFamily: 'Bourgeois',
+  banner: { visible: false, images: [], interval: 10 },
   bestOf: 5,
   teams: {
     blue:   { name: 'BLUE TEAM',   logo: null },
@@ -56,6 +58,8 @@ function loadState() {
     if (fs.existsSync(stateFile)) {
       const saved = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
       if (saved.eventName) state.eventName = saved.eventName;
+      if (saved.fontFamily) state.fontFamily = saved.fontFamily;
+      if (saved.banner) state.banner = saved.banner;
       if (saved.bestOf) state.bestOf = saved.bestOf;
       if (saved.teams) state.teams = saved.teams;
       if (saved.series) state.series = saved.series;
@@ -70,6 +74,8 @@ function saveAppState() {
   try {
     const toSave = {
       eventName: state.eventName,
+      fontFamily: state.fontFamily,
+      banner: state.banner,
       bestOf: state.bestOf,
       teams: state.teams,
       series: state.series,
@@ -416,6 +422,41 @@ function handleControlMessage(msg, ws) {
       broadcastFullState();
       break;
 
+    case 'set_font_family':
+      state.fontFamily = msg.data.fontFamily || 'Bourgeois';
+      saveAppState();
+      broadcastFullState();
+      break;
+
+    case 'set_banner_visibility':
+      state.banner.visible = !!msg.data.visible;
+      saveAppState();
+      broadcastFullState();
+      break;
+
+    case 'add_banner_image':
+      if (msg.data.image) {
+        if (!state.banner.images) state.banner.images = [];
+        state.banner.images.push(msg.data.image);
+        saveAppState();
+        broadcastFullState();
+      }
+      break;
+
+    case 'remove_banner_image':
+      if (state.banner.images && typeof msg.data.index === 'number') {
+        state.banner.images.splice(msg.data.index, 1);
+        saveAppState();
+        broadcastFullState();
+      }
+      break;
+
+    case 'set_banner_interval':
+      state.banner.interval = Math.max(1, msg.data.interval || 10);
+      saveAppState();
+      broadcastFullState();
+      break;
+
     case 'set_team':
       if (msg.data.side === 'blue' || msg.data.side === 'orange') {
         state.teams[msg.data.side] = {
@@ -509,6 +550,8 @@ function handleControlMessage(msg, ws) {
 
     case 'reset_all': {
       state.eventName = 'ROCKET LEAGUE TOURNAMENT';
+      state.fontFamily = 'Bourgeois';
+      state.banner = { visible: false, images: [], interval: 10 };
       state.bestOf = 5;
       state.teams = {
         blue:   { name: 'BLUE TEAM',   logo: null },

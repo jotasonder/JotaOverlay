@@ -1,12 +1,16 @@
 /* ─── Reset & base ──────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+:root {
+  --main-font: 'Bourgeois', sans-serif;
+}
+
 html, body {
   width: 1920px;
   height: 1080px;
   overflow: hidden;
   background: transparent;
-  font-family: 'Bourgeois', sans-serif;
+  font-family: var(--main-font);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -50,7 +54,7 @@ html, body {
   top: -1px;
   left: 50%;
   transform: translateX(-50%);
-  font-family: 'Bourgeois', sans-serif;
+  font-family: var(--main-font);
   font-size: 18px;
   font-weight: 600;
   color: #c4c4c4;
@@ -75,17 +79,17 @@ html, body {
   position: absolute;
   top: 36px;
   width: 320px;
-  font-family: 'Bourgeois', sans-serif;
+  height: 50px;
+  font-family: var(--main-font);
   font-size: 50px;
   font-weight: 700;
   font-style: italic;
   text-transform: uppercase;
   color: #ffffff;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
   text-align: center;
-  line-height: 1;
+  line-height: 50px;
 }
 .name-blue { left: 125px; }
 .name-orange { right: 120px; }
@@ -152,7 +156,7 @@ html, body {
   top: 104px;
   left: 50%;
   transform: translateX(-50%);
-  font-family: 'Bourgeois', sans-serif;
+  font-family: var(--main-font);
   font-size: 19px;
   font-weight: 600;
   color: #fff;
@@ -234,7 +238,7 @@ html, body {
 }
 
 .game-info-sb {
-  font-family: 'Bourgeois', sans-serif;
+  font-family: var(--main-font);
   font-size: 32px;
   font-weight: 900;
   font-style: italic;
@@ -292,7 +296,7 @@ html, body {
 .player-name-txt {
   position: absolute;
   top: 6px;
-  font-family: 'Bourgeois', sans-serif;
+  font-family: var(--main-font);
   font-size: 24px;
   font-weight: 800;
   font-style: italic;
@@ -413,6 +417,43 @@ html, body {
   margin-right: 4px; /* Slight optical adjustment */
 }
 
+
+/* BANNER COMPONENT ────────────────────────────────────────── */
+.sponsor-banner {
+  position: absolute;
+  top: 675px;
+  right: 0px;
+  width: 269px;
+  height: 96px;
+  z-index: 10;
+}
+.sponsor-banner-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+}
+.sponsor-banner-images {
+  position: absolute;
+  top: 10px;
+  left: 25px;
+  width: calc(100% - 35px);
+  height: calc(100% - 20px);
+  z-index: 2;
+}
+.sponsor-banner-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+.sponsor-banner-img.active {
+  opacity: 1;
+}
 
 /* GOAL VIEW & SCOREBOARD VIEW ────────────────────────────────────────── */
 .goal-banner {

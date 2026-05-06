@@ -101,6 +101,63 @@ function applyState(data) {
   el('rl-status').textContent = data.rlConnected
     ? '🎮 RL: Connected'
     : '🎮 RL: Disconnected';
+
+  // Font family
+  if (data.fontFamily) {
+    const fontSelect = el('select-font');
+    if (fontSelect && document.activeElement !== fontSelect) {
+      let exists = false;
+      for(let i = 0; i < fontSelect.options.length; i++) {
+        if (fontSelect.options[i].value === data.fontFamily) { exists = true; break; }
+      }
+      if (!exists) {
+        const opt = document.createElement('option');
+        opt.value = data.fontFamily;
+        opt.textContent = data.fontFamily;
+        fontSelect.appendChild(opt);
+      }
+      fontSelect.value = data.fontFamily;
+    }
+  }
+
+  // Banner
+  if (data.banner) {
+    const cbVisible = el('check-banner-visible');
+    if (cbVisible) cbVisible.checked = !!data.banner.visible;
+
+    const intervalInput = el('input-banner-interval');
+    if (intervalInput && document.activeElement !== intervalInput) {
+      intervalInput.value = data.banner.interval || 10;
+    }
+    
+    const imagesList = el('banner-images-list');
+    if (imagesList) {
+      imagesList.innerHTML = '';
+      (data.banner.images || []).forEach((src, idx) => {
+        const item = document.createElement('div');
+        item.style = 'position: relative; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 10px; transition: transform 0.2s, background 0.2s;';
+        
+        item.onmouseenter = () => { item.style.background = 'rgba(0,0,0,0.5)'; item.style.borderColor = 'rgba(255,255,255,0.3)'; };
+        item.onmouseleave = () => { item.style.background = 'rgba(0,0,0,0.3)'; item.style.borderColor = 'rgba(255,255,255,0.1)'; };
+
+        const img = document.createElement('img');
+        img.src = src;
+        img.style = 'height: 60px; width: 100%; object-fit: contain; border-radius: 4px;';
+        
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-danger btn-sm';
+        btn.style = 'width: 100%; padding: 4px; font-size: 12px; margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 4px; border-radius: 4px; cursor: pointer; border: none; font-weight: 600; color: white; background: #c53030;';
+        btn.innerHTML = '🗑️ Remove';
+        btn.onmouseenter = () => { btn.style.background = '#e53e3e'; };
+        btn.onmouseleave = () => { btn.style.background = '#c53030'; };
+        btn.addEventListener('click', () => send('remove_banner_image', { index: idx }));
+        
+        item.appendChild(img);
+        item.appendChild(btn);
+        imagesList.appendChild(item);
+      });
+    }
+  }
 }
 
 function syncTeamCard(side, teamData) {
@@ -362,6 +419,72 @@ function resetAddTeamForm() {
   el('add-team-logo-preview').src = '../assets/rl.png';
   el('btn-save-team').textContent = '💾 Save Team';
 }
+
+// ── Font settings ─────────────────────────────────────────────────────────
+async function loadSystemFonts() {
+  const select = el('select-font');
+  if (!select) return;
+
+  try {
+    const availableFonts = await window.queryLocalFonts();
+    const fonts = [...new Set(availableFonts.map(f => f.family))].sort();
+    
+    // Clear and populate
+    select.innerHTML = '';
+    fonts.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f;
+      opt.textContent = f;
+      select.appendChild(opt);
+    });
+    
+    // Check if Bourgeois exists, we add it explicitly if needed (handled below or just selected)
+    if (currentState.fontFamily) {
+      // If it doesn't exist in the list, add it
+      let exists = fonts.includes(currentState.fontFamily);
+      if (!exists) {
+        const opt = document.createElement('option');
+        opt.value = currentState.fontFamily;
+        opt.textContent = currentState.fontFamily;
+        select.prepend(opt);
+      }
+      select.value = currentState.fontFamily;
+    }
+  } catch (err) {
+    console.warn('System fonts API not available or permission denied.', err);
+    // Add default fallback options if API fails
+    if (select.options.length <= 1) {
+      select.innerHTML = '<option value="Bourgeois">Bourgeois</option><option value="Arial">Arial</option><option value="Impact">Impact</option><option value="Verdana">Verdana</option>';
+      if (currentState.fontFamily) select.value = currentState.fontFamily;
+    }
+  }
+}
+
+el('tab-ajustes').addEventListener('click', async () => {
+  await loadSystemFonts();
+});
+
+el('select-font').addEventListener('change', function() {
+  send('set_font_family', { fontFamily: this.value });
+});
+
+// ── Banner Settings ───────────────────────────────────────────────────────
+el('check-banner-visible').addEventListener('change', function() {
+  send('set_banner_visibility', { visible: this.checked });
+});
+
+el('input-banner-interval').addEventListener('change', function() {
+  send('set_banner_interval', { interval: parseInt(this.value) || 10 });
+});
+
+el('input-banner-image').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const b64 = await fileToBase64(file);
+  send('add_banner_image', { image: b64 });
+  // clear input so we can select same file again if needed
+  e.target.value = '';
+});
 
 // ── RL status ─────────────────────────────────────────────────────────────
 // (Updated via full_state)

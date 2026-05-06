@@ -42,9 +42,14 @@ Spanish instructions available in: [README.es.md](README.es.md)
     *   Ingame screen compatible with 1v1, 2v2, 3v3, and 4v4.
     *   Tags with player names, boost, and other stats.
     *   Automatic goal screen with goal statistics (scorer, speed, and assist).
+    *   Multi-sponsors banner.
     *   Post-match screen with scoreboards and MVP.
 *   Control panel to manage team names, logos, and series scores manually. Allows changes during the match.
 *   Fully portable and ready to use for streamers and casters, simply run the .exe file.
+
+## Typography
+
+To achieve the same look as in the screenshots, you will need to download the **Bourgeois** font.
 
 ## Advanced Features
 

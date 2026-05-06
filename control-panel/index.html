@@ -24,6 +24,7 @@
 <div class="tabs">
   <button class="tab-btn active" data-tab="principal" id="tab-principal">Main</button>
   <button class="tab-btn" data-tab="equipos" id="tab-equipos">Teams</button>
+  <button class="tab-btn" data-tab="ajustes" id="tab-ajustes">Settings</button>
 </div>
 
 <!-- ══════════════════════════════════════ TAB: MAIN ═══ -->
@@ -218,6 +219,52 @@
   </section>
 
 </div><!-- /tab-equipos-content -->
+
+<!-- ════════════════════════════════════════════ TAB: SETTINGS ═══ -->
+<div id="tab-ajustes-content" class="tab-content">
+  <section class="section">
+    <h3 class="section-title">⚙️ General Settings</h3>
+    <div class="field-row">
+      <label class="field-label" for="select-font">Overlay Font</label>
+      <select id="select-font" class="input-select">
+        <option value="Bourgeois">Bourgeois</option>
+      </select>
+    </div>
+  </section>
+
+  <section class="section">
+    <h3 class="section-title">🖼️ Banner</h3>
+    
+    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+      
+      <!-- Visibility -->
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <label for="check-banner-visible" style="font-weight: 600; color: #e0e0e0; cursor: pointer;">Visibility</label>
+        <input type="checkbox" id="check-banner-visible" style="width: 18px; height: 18px; cursor: pointer; accent-color: #055fdb;">
+      </div>
+
+      <!-- Interval -->
+      <div style="display: flex; align-items: center; gap: 10px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 20px;">
+        <label for="input-banner-interval" style="font-weight: 600; color: #e0e0e0;">Interval (s)</label>
+        <input type="number" id="input-banner-interval" class="input-text" style="width: 70px; padding: 4px 8px;" value="10" min="1">
+      </div>
+
+      <!-- Add Image (Custom styled file input) -->
+      <div style="display: flex; align-items: center; margin-left: auto;">
+        <label for="input-banner-image" class="btn btn-primary" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 600;">
+          <span>➕ Add Image</span>
+        </label>
+        <input type="file" id="input-banner-image" accept="image/*" style="display: none;">
+      </div>
+
+    </div>
+
+    <!-- Gallery -->
+    <div id="banner-images-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px;">
+      <!-- Image previews will go here -->
+    </div>
+  </section>
+</div><!-- /tab-ajustes-content -->
   
 <!-- Custom Modal -->
 <div id="modal-container" class="modal-container">

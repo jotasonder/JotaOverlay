@@ -22,6 +22,18 @@ function setText(id, val) {
   if (e) e.textContent = val ?? '';
 }
 
+function setTextAutoFit(id, val, defaultSize = 50, minSize = 10) {
+  const e = el(id);
+  if (!e) return;
+  e.textContent = val ?? '';
+  e.style.fontSize = defaultSize + 'px';
+  let currentSize = defaultSize;
+  while (e.scrollWidth > e.clientWidth && currentSize > minSize) {
+    currentSize -= 1;
+    e.style.fontSize = currentSize + 'px';
+  }
+}
+
 function setImg(id, src, fallback) {
   const e = el(id);
   if (!e) return;
@@ -191,14 +203,21 @@ function renderActivePlayer(players, spectated) {
 }
 
 // ── State handling ────────────────────────────────────────────────────────
+let bannerIntervalId = null;
+let currentBannerIdx = 0;
+
 function applyFullState(data) {
   currentState = data;
 
   setText('event-text', data.eventName);
 
+  if (data.fontFamily) {
+    document.documentElement.style.setProperty('--main-font', `'${data.fontFamily}', sans-serif`);
+  }
+
   const teams = data.teams || {};
-  setText('name-blue', teams.blue?.name || 'BLUE TEAM');
-  setText('name-orange', teams.orange?.name || 'ORANGE TEAM');
+  setTextAutoFit('name-blue', teams.blue?.name || 'BLUE TEAM', 50, 16);
+  setTextAutoFit('name-orange', teams.orange?.name || 'ORANGE TEAM', 50, 16);
   setImg('logo-blue', teams.blue?.logo, '/assets/rl.png');
   setImg('logo-orange', teams.orange?.logo, '/assets/rl.png');
 
@@ -213,7 +232,6 @@ function applyFullState(data) {
     timerEl.textContent = (game.isOT ? '+' : '') + (data.formattedTime || '5:00');
     timerEl.className = game.isOT ? 'timer-ot' : 'timer';
   }
-  setText('game-info', `GAME ${game.number ?? 0} | BEST OF ${data.bestOf || 5}`);
 
   const series = data.series || { blue: 0, orange: 0 };
   renderSeriesDots('series-dots-blue', series.blue, data.bestOf || 5, 'blue');
@@ -224,6 +242,46 @@ function applyFullState(data) {
   
   renderPlayerPanels(players, spectated);
   renderActivePlayer(players, spectated);
+
+  if (data.banner) {
+    const bannerEl = el('sponsor-banner');
+    const imagesContainer = el('sponsor-banner-images');
+    if (bannerEl) {
+      if (data.banner.visible) {
+        bannerEl.classList.remove('hidden');
+      } else {
+        bannerEl.classList.add('hidden');
+      }
+    }
+    
+    if (imagesContainer) {
+      // Clear interval
+      if (bannerIntervalId) clearInterval(bannerIntervalId);
+      imagesContainer.innerHTML = '';
+      
+      const images = data.banner.images || [];
+      if (images.length > 0) {
+        // Create imgs
+        const imgEls = images.map((src, idx) => {
+          const img = document.createElement('img');
+          img.className = 'sponsor-banner-img' + (idx === 0 ? ' active' : '');
+          img.src = src;
+          imagesContainer.appendChild(img);
+          return img;
+        });
+
+        if (images.length > 1) {
+          currentBannerIdx = 0;
+          const interval = (data.banner.interval || 10) * 1000;
+          bannerIntervalId = setInterval(() => {
+            imgEls[currentBannerIdx].classList.remove('active');
+            currentBannerIdx = (currentBannerIdx + 1) % imgEls.length;
+            imgEls[currentBannerIdx].classList.add('active');
+          }, interval);
+        }
+      }
+    }
+  }
 
   showView(data.view || 'hud');
 }

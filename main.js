@@ -39,6 +39,14 @@ function createControlPanel() {
   controlPanel.on('closed', () => {
     app.quit();
   });
+
+  controlPanel.webContents.session.setPermissionRequestHandler((webContents, permission, callback) => {
+    if (permission === 'local-fonts') {
+      callback(true);
+    } else {
+      callback(true);
+    }
+  });
 }
 
 app.whenReady().then(() => {
