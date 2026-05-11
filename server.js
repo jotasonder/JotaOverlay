@@ -35,7 +35,7 @@ let state = {
     orange: { name: 'ORANGE TEAM', logo: null }
   },
   series:  { blue: 0, orange: 0 },
-  game:    { blueScore: 0, orangeScore: 0, time: 300, isOT: false, number: 0 },
+  game:    { blueScore: 0, orangeScore: 0, time: 300, isOT: false, number: 1 },
   gameTeams: { blue: '', orange: '' },
   players: [],          // active players (from last UpdateState)
   playerCache: {},      // all players seen (keyed by name) — for scoreboard
@@ -542,7 +542,7 @@ function handleControlMessage(msg, ws) {
 
     case 'adjust_series':
       if (msg.data.side === 'blue' || msg.data.side === 'orange') {
-        state.series[msg.data.side] = Math.max(0, state.series[msg.data.side] + (msg.data.delta || 0));
+        state.series[msg.data.side] = Math.max(0, Math.min(Math.ceil(state.bestOf / 2), state.series[msg.data.side] + (msg.data.delta || 0)));
         saveAppState();
         broadcastFullState();
       }
@@ -557,18 +557,23 @@ function handleControlMessage(msg, ws) {
 
     case 'set_best_of':
       state.bestOf = msg.data.value || 5;
+      state.game.number = Math.min(state.game.number, state.bestOf);
+      state.series.blue = Math.min(state.series.blue, Math.ceil(state.bestOf / 2));
+      state.series.orange = Math.min(state.series.orange, Math.ceil(state.bestOf / 2));
       saveAppState();
       broadcastFullState();
       break;
 
     case 'adjust_game_number':
-      state.game.number = Math.max(0, state.game.number + (msg.data.delta || 0));
+      state.game.number = Math.max(1, Math.min(state.bestOf, state.game.number + (msg.data.delta || 0)));
       saveAppState();
       broadcastFullState();
       break;
 
-    case 'set_game_number':
-      state.game.number = Math.max(0, msg.data.value ?? 0);
+    case 'reset_series':
+      state.game.number = 1;
+      state.series.blue = 0;
+      state.series.orange = 0;
       saveAppState();
       broadcastFullState();
       break;

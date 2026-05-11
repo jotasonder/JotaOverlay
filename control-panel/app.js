@@ -509,7 +509,7 @@ el('btn-series-orange-minus').addEventListener('click',() => send('adjust_series
 // ── Event: Game Number buttons ────────────────────────────────────────────
 el('btn-game-plus').addEventListener('click',   () => send('adjust_game_number', { delta: +1 }));
 el('btn-game-minus').addEventListener('click',  () => send('adjust_game_number', { delta: -1 }));
-el('btn-game-reset').addEventListener('click',  () => send('set_game_number', { value: 0 }));
+el('btn-game-reset').addEventListener('click',  () => send('reset_series'));
 
 // ── Event: Pull Team Names from RL API ────────────────────────────────────
 el('btn-pull-name-blue').addEventListener('click', () => {
