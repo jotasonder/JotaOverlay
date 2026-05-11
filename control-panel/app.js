@@ -8,6 +8,7 @@ let pendingLogoOrange = null;
 let pendingAddLogo    = null;
 let editingTeamName   = null;  // null = add mode, string = edit mode
 let _lastPlayerKey    = '';    // guard to avoid unnecessary select rebuilds
+let updateBannerDismissed = false; 
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 function send(type, data) {
@@ -175,6 +176,22 @@ function applyState(data) {
     const verEl = el('app-version');
     if (verEl) verEl.textContent = data.version;
   }
+
+  // Update notification
+  const updateBanner = el('update-notification');
+  if (updateBanner) {
+    if (data.updateAvailable && !updateBannerDismissed) {
+      el('update-version-tag').textContent = data.updateAvailable.version;
+      el('update-link').href = data.updateAvailable.url;
+      updateBanner.style.display = 'flex';
+    } else {
+      updateBanner.style.display = 'none';
+    }
+  }
+
+  // Updates settings
+  const cbUpdateAlerts = el('check-update-alerts');
+  if (cbUpdateAlerts) cbUpdateAlerts.checked = data.updateChecksEnabled !== false;
 }
 
 function syncTeamCard(side, teamData) {
@@ -640,6 +657,16 @@ el('input-banner-image').addEventListener('change', async (e) => {
   send('add_banner_image', { image: b64 });
   // clear input so we can select same file again if needed
   e.target.value = '';
+});
+
+// ── Update Notification dismissal ─────────────────────────────────────────
+el('btn-dismiss-update').addEventListener('click', () => {
+  updateBannerDismissed = true;
+  el('update-notification').style.display = 'none';
+});
+
+el('check-update-alerts').addEventListener('change', function() {
+  send('set_update_checks_enabled', { enabled: this.checked });
 });
 
 // ── Facecams: mode selector & grid logic ─────────────────────────────────

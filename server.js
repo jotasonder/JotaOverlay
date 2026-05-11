@@ -41,7 +41,9 @@ let state = {
   playerCache: {},      // all players seen (keyed by name) — for scoreboard
   currentGoal: null,    // { scorer, assister, speed, team }
   spectatedPlayer: null,
-  rlConnected: false
+  rlConnected: false,
+  updateAvailable: null,    // { version, url }
+  updateChecksEnabled: true
 };
 
 let savedTeams = [];   // [{ name, logo }]
@@ -92,6 +94,9 @@ function loadState() {
       if (saved.game && typeof saved.game.number === 'number') {
         state.game.number = saved.game.number;
       }
+      if (saved.updateChecksEnabled !== undefined) {
+        state.updateChecksEnabled = saved.updateChecksEnabled;
+      }
     }
   } catch (e) { console.error('Error loading state:', e); }
 }
@@ -106,7 +111,8 @@ function saveAppState() {
       bestOf: state.bestOf,
       teams: state.teams,
       series: state.series,
-      game: { number: state.game.number }
+      game: { number: state.game.number },
+      updateChecksEnabled: state.updateChecksEnabled
     };
     fs.mkdirSync(dataDir, { recursive: true });
     fs.writeFileSync(stateFile, JSON.stringify(toSave, null, 2));
@@ -137,6 +143,41 @@ function getFullState() {
       formattedTime: formatTime(state.game.time)
     }
   };
+}
+
+function isNewerVersion(remote, local) {
+  const r = remote.replace(/^v/, '').split('.').map(Number);
+  const l = local.replace(/^v/, '').split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((r[i] || 0) > (l[i] || 0)) return true;
+    if ((r[i] || 0) < (l[i] || 0)) return false;
+  }
+  return false;
+}
+
+async function checkForUpdates() {
+  if (!state.updateChecksEnabled) return;
+  try {
+    const repo = 'jotasonder/JotaOverlay';
+    const response = await fetch(`https://api.github.com/repos/${repo}/releases/latest`, {
+      headers: { 'User-Agent': 'JotaOverlay-Updater' }
+    });
+    if (!response.ok) return;
+    
+    const data = await response.json();
+    const remoteVersion = data.tag_name; // e.g. "v0.2.1"
+    
+    if (isNewerVersion(remoteVersion, appVersion)) {
+      state.updateAvailable = {
+        version: remoteVersion,
+        url: data.html_url
+      };
+      console.log(`[Update] New version available: ${remoteVersion}`);
+      broadcastFullState();
+    }
+  } catch (e) {
+    console.error('[Update] Error checking for updates:', e);
+  }
 }
 
 // ─── RL TCP Client ─────────────────────────────────────────────────────────────
@@ -635,8 +676,17 @@ function handleControlMessage(msg, ws) {
       
       saveAppState();
       broadcastFullState();
+      broadcastFullState();
       break;
     }
+
+    case 'set_update_checks_enabled':
+      state.updateChecksEnabled = !!msg.data.enabled;
+      saveAppState();
+      broadcastFullState();
+      // If we just enabled it, trigger a check
+      if (state.updateChecksEnabled) checkForUpdates();
+      break;
 
     default:
       break;
@@ -685,4 +735,7 @@ module.exports.start = function(baseDir) {
   startHttpServer(appDir);
   startBridgeServer();
   connectToRL();
+  
+  // Check for updates on startup
+  setTimeout(checkForUpdates, 3000); 
 };

@@ -25,6 +25,37 @@ html, body {
   flex-direction: column;
 }
 
+/* ─── Update Notification ────────────────────────────────────────────────── */
+.update-notification {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 20px;
+  background: linear-gradient(90deg, #055fdb 0%, #03449e 100%);
+  color: white;
+  font-size: 13px;
+  animation: slideDown 0.4s ease-out;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  z-index: 100;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.update-icon { font-size: 16px; }
+.update-text { flex: 1; font-weight: 500; }
+.update-text strong { font-weight: 700; color: #fff; background: rgba(0,0,0,0.2); padding: 1px 5px; border-radius: 4px; }
+.update-notification .btn-primary { background: white; color: var(--blue); border: none; padding: 4px 12px; font-size: 11px; }
+.update-notification .btn-primary:hover { background: #f0f0f0; filter: none; }
+
+.update-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 /* ─── Status bar ─────────────────────────────────────────────────────────── */
 .status-bar {
   display: flex;

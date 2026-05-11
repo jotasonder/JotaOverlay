@@ -19,6 +19,14 @@
   </span>
   <button class="btn btn-danger btn-sm" id="btn-reset-all" style="margin-left: auto;">⚠️ Reset All</button>
 </div>
+<div id="update-notification" class="update-notification" style="display: none;">
+  <span class="update-icon">🚀</span>
+  <span class="update-text">New version available: <strong id="update-version-tag">v0.0.0</strong></span>
+  <div class="update-actions">
+    <a id="update-link" href="#" target="_blank" class="btn btn-primary btn-sm">Download</a>
+    <button id="btn-dismiss-update" class="btn btn-ghost btn-sm" style="color: white; border-color: rgba(255,255,255,0.3);">✕</button>
+  </div>
+</div>
 
 <!-- Tabs -->
 <div class="tabs">
@@ -472,6 +480,20 @@
     <!-- Gallery -->
     <div id="banner-images-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px;">
       <!-- Image previews will go here -->
+    </div>
+  </section>
+
+  <section class="section">
+    <h3 class="section-title">🔄 Updates</h3>
+    <div style="display: flex; flex-direction: column; gap: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <label for="check-update-alerts" style="font-weight: 600; color: #e0e0e0; cursor: pointer;">Show Update Alerts</label>
+        <input type="checkbox" id="check-update-alerts" style="width: 18px; height: 18px; cursor: pointer; accent-color: #055fdb;" checked>
+        <span style="font-size: 12px; color: var(--muted); margin-left: 10px;">(Check for new versions on startup)</span>
+      </div>
+      <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+        <a href="https://github.com/jotasonder/JotaOverlay/releases" target="_blank" class="btn btn-secondary" style="width: 100%;">🚀 Check Versions on GitHub</a>
+      </div>
     </div>
   </section>
 </div><!-- /tab-ajustes-content -->
