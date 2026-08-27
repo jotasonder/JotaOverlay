@@ -20,6 +20,11 @@ let facecamsFile;
 
 let assetsDir;
 
+let presetsDir;
+let presetsFile;
+let savedPresets = [];   // [{ name, slug, assets }]
+
+
 // Overlay assets that can be overridden from the control panel.
 // Acts as a whitelist — anything not listed is rejected.
 const ASSET_NAMES = [
@@ -45,6 +50,7 @@ let state = {
   facecamsEnabled: true,
   banner: { visible: false, images: [], interval: 10 },
   assets: {},
+  activePreset: null, 
   bestOf: 5,
   teams: {
     blue:   { name: 'BLUE TEAM',   logo: null },
@@ -96,6 +102,32 @@ function saveFacecams() {
   } catch (e) { console.error('Error saving facecams:', e); }
 }
 
+
+function loadPresets() {
+  try {
+    if (fs.existsSync(presetsFile)) {
+      savedPresets = JSON.parse(fs.readFileSync(presetsFile, 'utf8'));
+    }
+  } catch (e) { savedPresets = []; }
+}
+
+function savePresets() {
+  try {
+    fs.mkdirSync(dataDir, { recursive: true });
+    fs.writeFileSync(presetsFile, JSON.stringify(savedPresets, null, 2));
+  } catch (e) { console.error('Error saving presets:', e); }
+}
+
+// Preset names become folder names, so strip anything a filesystem won't take.
+function slugify(name) {
+  return String(name).trim().toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+}
+
+
+
 function loadState() {
   try {
     if (fs.existsSync(stateFile)) {
@@ -105,6 +137,7 @@ function loadState() {
       if (saved.facecamsEnabled !== undefined) state.facecamsEnabled = saved.facecamsEnabled;
       if (saved.banner) state.banner = saved.banner;
       if (saved.assets) state.assets = saved.assets;
+      if (saved.activePreset) state.activePreset = saved.activePreset;
       if (saved.bestOf) state.bestOf = saved.bestOf;
       if (saved.teams) state.teams = saved.teams;
       if (saved.series) state.series = saved.series;
@@ -126,6 +159,7 @@ function saveAppState() {
       facecamsEnabled: state.facecamsEnabled,
       banner: state.banner,
       assets: state.assets,
+      activePreset: state.activePreset,
       bestOf: state.bestOf,
       teams: state.teams,
       series: state.series,
@@ -158,6 +192,7 @@ function getFullState() {
       ...state,
       savedTeams,
       facecams: savedFacecams,
+      presets: savedPresets,
       formattedTime: formatTime(state.game.time)
     }
   };
@@ -572,6 +607,77 @@ function handleControlMessage(msg, ws) {
       break;
     }
 
+    case 'save_preset': {
+      // name given = create/overwrite by that name; no name = update the active preset
+      const rawName = (msg.data && msg.data.name || '').trim() || state.activePreset;
+      if (!rawName) break;
+      const slug = slugify(rawName);
+      if (!slug) break;
+      try {
+        const dest = path.join(presetsDir, slug);
+        fs.rmSync(dest, { recursive: true, force: true });
+        fs.mkdirSync(dest, { recursive: true });
+
+        const assets = {};
+        Object.keys(state.assets).forEach(file => {
+          const src = path.join(assetsDir, file);
+          if (!fs.existsSync(src)) return;
+          fs.copyFileSync(src, path.join(dest, file));
+          assets[file] = `/data/presets/${slug}/${file}`;
+        });
+
+        const idx = savedPresets.findIndex(p => p.slug === slug);
+        const entry = { name: rawName, slug, assets };
+        if (idx >= 0) savedPresets[idx] = entry;
+        else savedPresets.push(entry);
+
+        savePresets();
+        state.activePreset = rawName;
+        saveAppState();
+        broadcastFullState();
+      } catch (e) { console.error('Error saving preset:', e); }
+      break;
+    }
+
+    case 'apply_preset': {
+      const p = savedPresets.find(x => x.name === msg.data.name);
+      if (!p) break;
+      try {
+        fs.rmSync(assetsDir, { recursive: true, force: true });
+        fs.mkdirSync(assetsDir, { recursive: true });
+
+        const assets = {};
+        Object.keys(p.assets || {}).forEach(file => {
+          const src = path.join(presetsDir, p.slug, file);
+          if (!fs.existsSync(src)) return;
+          fs.copyFileSync(src, path.join(assetsDir, file));
+          assets[file] = `/data/assets/${file}?v=${Date.now()}`;
+        });
+
+        state.assets = assets;
+        state.activePreset = p.name;
+        saveAppState();
+        broadcastFullState();
+      } catch (e) { console.error('Error applying preset:', e); }
+      break;
+    }
+
+    case 'delete_preset': {
+      const p = savedPresets.find(x => x.name === msg.data.name);
+      if (!p) break;
+      try {
+        fs.rmSync(path.join(presetsDir, p.slug), { recursive: true, force: true });
+      } catch (e) { console.error('Error removing preset folder:', e); }
+      savedPresets = savedPresets.filter(x => x.slug !== p.slug);
+      savePresets();
+      if (state.activePreset === p.name) {
+        state.activePreset = null;
+        saveAppState();
+      }
+      broadcastFullState();
+      break;
+    }
+
     case 'set_team':
       if (msg.data.side === 'blue' || msg.data.side === 'orange') {
         state.teams[msg.data.side] = {
@@ -860,11 +966,14 @@ module.exports.start = function(baseDir) {
   stateFile = path.join(dataDir, 'state.json');
   facecamsFile = path.join(dataDir, 'facecams.json');
   assetsDir = path.join(dataDir, 'assets');
+  presetsDir = path.join(dataDir, 'presets');
+  presetsFile = path.join(dataDir, 'presets.json');
 
   fs.mkdirSync(dataDir, { recursive: true });
   loadTeams();
   loadState();
   loadFacecams();
+  loadPresets();
 
   startHttpServer(appDir);
   startBridgeServer();

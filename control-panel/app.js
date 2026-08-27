@@ -103,7 +103,7 @@ function applyState(data) {
 
   // Overlay assets
   syncAssets(data.assets || {});
-
+  syncPresets(data.presets || [], data.activePreset);
   // RL status
   el('rl-status').textContent = data.rlConnected
     ? '🎮 RL: Connected'
@@ -1190,6 +1190,66 @@ function syncAssets(assets) {
 }
 
 initAssetsTab();
+
+// ── Asset presets ─────────────────────────────────────────────────────────
+function syncPresets(presets, active) {
+  const sel = el('select-preset');
+  if (!sel) return;
+
+  if (document.activeElement !== sel) {
+    sel.innerHTML = '<option value="">— No preset —</option>';
+    presets.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = p.name;
+      sel.appendChild(opt);
+    });
+    sel.value = active || '';
+  }
+
+  // Save / Reload / Delete only make sense with a preset selected
+  const hasSel = !!sel.value;
+  ['btn-reload-preset', 'btn-save-preset', 'btn-delete-preset'].forEach(id => {
+    const b = el(id);
+    if (b) { b.disabled = !hasSel; b.style.opacity = hasSel ? '' : '0.4'; }
+  });
+}
+
+el('select-preset').addEventListener('change', function() {
+  if (!this.value) return;
+  send('apply_preset', { name: this.value });
+});
+
+el('btn-reload-preset').addEventListener('click', async () => {
+  const name = el('select-preset').value;
+  if (!name) return;
+  const ok = await customConfirm(
+    'Reload Preset',
+    `Discard current asset changes and reload "${name}"?`,
+    'Reload'
+  );
+  if (ok) send('apply_preset', { name });
+});
+
+el('btn-save-preset').addEventListener('click', () => {
+  const name = el('select-preset').value;
+  if (!name) return;
+  send('save_preset', { name });
+});
+
+el('btn-delete-preset').addEventListener('click', async () => {
+  const name = el('select-preset').value;
+  if (!name) return;
+  const ok = await customConfirm('Delete Preset', `Delete the preset "${name}"?`, 'Delete');
+  if (ok) send('delete_preset', { name });
+});
+
+el('btn-save-new-preset').addEventListener('click', () => {
+  const name = el('input-preset-name').value.trim();
+  if (!name) { alert('Enter a preset name.'); return; }
+  send('save_preset', { name });
+  el('input-preset-name').value = '';
+});
 
 // ── RL status ─────────────────────────────────────────────────────────────
 // (Updated via full_state)
