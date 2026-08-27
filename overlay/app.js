@@ -1,8 +1,8 @@
 /* ─── Overlay logic — connects to WS bridge on :3001 ────────────────────── */
 
 const WS_URL = 'ws://localhost:3001';
-const BLUE   = '#055fdb';
-const ORANGE = '#e97139';
+const BLUE   = '#cc0000';
+const ORANGE = '#f2f0eb';
 
 let ws;
 let currentState = {};
@@ -16,6 +16,11 @@ const views = {
 };
 
 function el(id) { return document.getElementById(id); }
+
+// Returns the user's override for an asset, or the bundled default.
+function asset(name) {
+  return (currentState.assets && currentState.assets[name]) || `/assets/${name}`;
+}
 
 function setText(id, val) {
   const e = el(id);
@@ -50,7 +55,7 @@ function showView(name) {
   }
 
   if (sbImg) {
-    sbImg.src = (name === 'scoreboard') ? '/assets/podium-scoreboard2.png' : '/assets/scoreboard.png';
+    sbImg.src = asset(name === 'scoreboard' ? 'podium-scoreboard2.png' : 'scoreboard.png');
   }
 
   if (name === 'goal') {
@@ -128,9 +133,9 @@ function renderPlayerPanels(players, spectated) {
       const bg = document.createElement('img');
       bg.className = 'player-bg';
       if (isSpectated) {
-        bg.src = side === 'blue' ? '/assets/player-blue.png' : '/assets/player-orange.png';
+        bg.src = asset(side === 'blue' ? 'player-blue.png' : 'player-orange.png');
       } else {
-        bg.src = '/assets/player.png';
+        bg.src = asset('player.png');
       }
       row.appendChild(bg);
 
@@ -234,7 +239,7 @@ function renderActivePlayer(players, spectated, facecams) {
 
   // Bottom left background
   const bgImg = el('active-player-bg');
-  if (bgImg) bgImg.src = p.team === 0 ? '/assets/player-blue-bot.png' : '/assets/player-orange-bot.png';
+  if (bgImg) bgImg.src = asset(p.team === 0 ? 'player-blue-bot.png' : 'player-orange-bot.png');
 
   // Bottom left bar
   const botBar = el('bot-boost-bar');
@@ -274,6 +279,18 @@ let currentBannerIdx = 0;
 function applyFullState(data) {
   currentState = data;
 
+  // Assets set once in HTML
+  setImg('boost-base',        asset('boost.png'));
+  setImg('boost-tags',        asset('boost-tags.png'));
+  setImg('sponsor-banner-bg', asset('banner.png'));
+
+  // Post-match background is a CSS background-image, not an <img>
+  const sbBgEl = document.querySelector('.sb-bg');
+  if (sbBgEl) {
+    const bg = data.assets && data.assets['podium-full.png'];
+    sbBgEl.style.backgroundImage = bg ? `url('${bg}')` : '';
+  }
+  
   setText('event-text', data.eventName);
 
   if (data.fontFamily) {
@@ -371,7 +388,7 @@ function applyStateUpdate(gameData, players, spectated, facecams) {
 
 function applyGoalView(goal) {
   if (!goal) return;
-  setImg('goal-banner-img', goal.team === 0 ? '/assets/goal-blue-2.png' : '/assets/goal-orange-2.png');
+  setImg('goal-banner-img', asset(goal.team === 0 ? 'goal-blue-2.png' : 'goal-orange-2.png'));
   setText('goal-scorer', (goal.scorer || '').toUpperCase());
   setText('goal-speed', goal.speed || 0);
 
@@ -431,7 +448,7 @@ function renderScoreboard(playerCache, data) {
       if(p.name === mvpName) {
         n.classList.add('mvp-player');
         const m = document.createElement('img');
-        m.src = '/assets/mvp.png';
+        m.src = asset('mvp.png');
         m.className = 'mvp-icon';
         n.appendChild(m);
       }

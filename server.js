@@ -18,6 +18,18 @@ let teamsFile;
 let stateFile;
 let facecamsFile;
 
+let assetsDir;
+
+// Overlay assets that can be overridden from the control panel.
+// Acts as a whitelist — anything not listed is rejected.
+const ASSET_NAMES = [
+  'scoreboard.png', 'podium-scoreboard2.png', 'podium-full.png',
+  'boost.png', 'boost-tags.png', 'banner.png',
+  'player.png', 'player-blue.png', 'player-orange.png',
+  'player-blue-bot.png', 'player-orange-bot.png',
+  'goal-blue-2.png', 'goal-orange-2.png', 'mvp.png'
+];
+
 let appVersion = '0.0.0';
 try {
   const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
@@ -32,6 +44,7 @@ let state = {
   fontFamily: 'Bourgeois',
   facecamsEnabled: true,
   banner: { visible: false, images: [], interval: 10 },
+  assets: {},
   bestOf: 5,
   teams: {
     blue:   { name: 'BLUE TEAM',   logo: null },
@@ -91,6 +104,7 @@ function loadState() {
       if (saved.fontFamily) state.fontFamily = saved.fontFamily;
       if (saved.facecamsEnabled !== undefined) state.facecamsEnabled = saved.facecamsEnabled;
       if (saved.banner) state.banner = saved.banner;
+      if (saved.assets) state.assets = saved.assets;
       if (saved.bestOf) state.bestOf = saved.bestOf;
       if (saved.teams) state.teams = saved.teams;
       if (saved.series) state.series = saved.series;
@@ -111,6 +125,7 @@ function saveAppState() {
       fontFamily: state.fontFamily,
       facecamsEnabled: state.facecamsEnabled,
       banner: state.banner,
+      assets: state.assets,
       bestOf: state.bestOf,
       teams: state.teams,
       series: state.series,
@@ -534,6 +549,28 @@ function handleControlMessage(msg, ws) {
       saveAppState();
       broadcastFullState();
       break;
+    
+    case 'set_asset': {
+      const { name, image } = msg.data || {};
+      if (!ASSET_NAMES.includes(name)) break;   // whitelist guards against path traversal
+      try {
+        if (!image) {
+          delete state.assets[name];
+          const f = path.join(assetsDir, name);
+          if (fs.existsSync(f)) fs.unlinkSync(f);
+        } else {
+          const m = /^data:image\/[a-z+.-]+;base64,(.+)$/i.exec(image);
+          if (!m) break;
+          fs.mkdirSync(assetsDir, { recursive: true });
+          fs.writeFileSync(path.join(assetsDir, name), Buffer.from(m[1], 'base64'));
+          // ?v= busts the browser cache when the same filename is replaced
+          state.assets[name] = `/data/assets/${name}?v=${Date.now()}`;
+        }
+        saveAppState();
+        broadcastFullState();
+      } catch (e) { console.error('Error saving asset:', e); }
+      break;
+    }
 
     case 'set_team':
       if (msg.data.side === 'blue' || msg.data.side === 'orange') {
@@ -822,6 +859,7 @@ module.exports.start = function(baseDir) {
   teamsFile = path.join(dataDir, 'teams.json');
   stateFile = path.join(dataDir, 'state.json');
   facecamsFile = path.join(dataDir, 'facecams.json');
+  assetsDir = path.join(dataDir, 'assets');
 
   fs.mkdirSync(dataDir, { recursive: true });
   loadTeams();

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "adm-zip": "^0.5.17",
+    "build": "^0.1.4",
     "express": "^4.18.2",
     "ws": "^8.16.0"
   },
@@ -27,7 +28,9 @@
     },
     "win": {
       "icon": "assets/icon.png",
-      "target": ["portable"]
+      "target": [
+        "portable"
+      ]
     },
     "files": [
       "main.js",
@@ -37,5 +40,8 @@
       "assets/**/*",
       "data/**/*"
     ]
+  },
+  "allowScripts": {
+    "electron@28.3.3": true
   }
 }

@@ -38,7 +38,7 @@ html, body {
   left: 50%;
   transform: translateX(-50%);
   width: 1277px;
-  height: 140px;
+  height: 185px;
   z-index: 20;
 }
 .scoreboard-bg {
@@ -51,53 +51,52 @@ html, body {
 /* Event text: fits in the top black bar of scoreboard */
 .event-text {
   position: absolute;
-  top: -1px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--main-font);
   font-size: 18px;
   font-weight: 600;
-  color: #c4c4c4;
+  color: #f2f0eb;
   white-space: nowrap;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.07em;
 }
 
 /* Logos (Inside the scoreboard) perfectly fitting the hexagon */
 .team-logo {
   position: absolute;
-  top: 28px;
+  top: 43px;
   width: 68px;
   height: 68px;
   object-fit: contain;
 }
-.logo-blue { left: 16px; }
-.logo-orange { right: 16px; }
+.logo-blue { left: 100px; }
+.logo-orange { right: 100px; }
 
 /* Names */
 .team-name {
   position: absolute;
-  top: 36px;
-  width: 320px;
+  top: 58px;
+  width: 250px;
   height: 50px;
   font-family: var(--main-font);
   font-size: 50px;
-  font-weight: 700;
+  font-weight: 800;
   font-style: italic;
   text-transform: uppercase;
-  color: #ffffff;
-  white-space: nowrap;
-  overflow: visible;
+  color: #0d0d0d;
+  white-space: nowrap;   
   text-align: center;
-  line-height: 50px;
+  line-height: 40px;
 }
-.name-blue { left: 125px; }
-.name-orange { right: 120px; }
+.name-blue { left: 210px; }
+.name-orange { right: 210px; }
 
 /* Scores */
 .score {
   position: absolute;
-  top: 13px;
+  top: 30px;
   width: 90px;
   height: 90px;
   display: flex;
@@ -106,17 +105,17 @@ html, body {
   font-size: 78px;
   font-weight: 800;
   font-style: italic;
-  color: #fff;
+  color: #f2f0eb;
 }
 
 /* Cuanto mayor el número, más cerca del centro */
-.score-blue { left: 459px; }
+.score-blue { left: 464px; }
 .score-orange { right: 459px; }
 
 /* Timer */
 .timer {
   position: absolute;
-  top: 13px;
+  top: 30px;
   left: 50%;
   transform: translateX(-50%);
   width: 190px;
@@ -124,16 +123,16 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 78px;
+  font-size: 70px;
   font-weight: 600;
   font-style: italic;
-  color: #0f0f0f;
-  letter-spacing: -0.02em;
+  color: #f2f0eb;
+  letter-spacing: -0.03em;
 }
 
 .timer-ot {
   position: absolute;
-  top: 13px;
+  top: 30px;
   left: 50%;
   transform: translateX(-50%);
   width: 190px;
@@ -141,10 +140,10 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 62px;
+  font-size: 56px;
   font-weight: 900;
   font-style: italic;
-  color: #550606;
+  color: #8b0000;
   letter-spacing: -0.02em;
   -webkit-text-stroke-width: 1px;
   -webkit-text-stroke-color: #ff0000;
@@ -153,39 +152,39 @@ html, body {
 /* Game Info / Series */
 .game-info {
   position: absolute;
-  top: 104px;
+  top: 140px;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--main-font);
   font-size: 19px;
   font-weight: 600;
-  color: #fff;
+  color: #e8e4dc;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .series-dots {
   position: absolute;
-  top: 110px;
+  top: 120px;
   display: flex;
-  gap: 10px;
+  gap: 15px;
 }
-.dots-blue { left: 200px; flex-direction: row; }
-.dots-orange { right: 200px; flex-direction: row-reverse; }
+.dots-blue { left: 225px; flex-direction: row; }
+.dots-orange { right: 225px; flex-direction: row-reverse; }
 
 .series-dot {
-  width: 55px;
-  height: 10px;
-  background: #444;
+  width: 65px;
+  height: 15px;
+  background: #1a1a1a;
 }
 /* If they are not won, we don't show a color, the grey cutout from the image behind it will show */
-.series-dot.won-blue { background: #055fdb; }
-.series-dot.won-orange { background: #e97139; }
+.series-dot.won-blue { background: #cc0000; }
+.series-dot.won-orange { background: #f2f0eb; }
 
 /* Scoreboard View Adjustments (End of match) */
 .scoreboard.view-scoreboard {
   width: 1277px; 
-  height: 176px;
+  height: 140px;
 }
 
 .scoreboard.view-scoreboard .scoreboard-bg {
@@ -195,21 +194,21 @@ html, body {
 }
 
 .scoreboard.view-scoreboard > *:not(.scoreboard-bg) {
-  margin-top: 38px;
+  margin-top: 0px;
 }
 
 .scoreboard.view-scoreboard .score-blue {
-  left: 456px; 
+  left: 469px; 
 }
 
 .scoreboard.view-scoreboard .score-orange {
-  right: 456px;
+  right: 469px;
 }
 
 .scoreboard.view-scoreboard .event-text {
    font-size: 24px; 
-   color: #bdbdbd; 
-   top: -25px; 
+   color: #f2f0eb; 
+   top: 0px; 
 }
 
 .scoreboard.view-scoreboard .timer,
@@ -239,10 +238,12 @@ html, body {
 
 .game-info-sb {
   font-family: var(--main-font);
-  font-size: 32px;
+  margin-top: 10px;
+  margin-bottom: -15px;
+  font-size: 48px;
   font-weight: 900;
   font-style: italic;
-  color: #0f0f0f;
+  color: #f2f0eb;
   text-transform: uppercase;
   line-height: 1.1;
 }
@@ -288,10 +289,10 @@ html, body {
   position: absolute;
   top: 0;
   height: 7px;
-  background: #fff;
+  background: #e8e4dc;
 }
-.players-left .player-boost-bar { left: 0; background: #055fdb; }
-.players-right .player-boost-bar { right: 0; background: #e97139; }
+.players-left .player-boost-bar { left: 0; background: #cc0000; }
+.players-right .player-boost-bar { right: 0; background: #f2f0eb; }
 
 .player-name-txt {
   position: absolute;
@@ -300,7 +301,7 @@ html, body {
   font-size: 24px;
   font-weight: 800;
   font-style: italic;
-  color: #fff;
+  color: #e8e4dc;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
@@ -316,7 +317,7 @@ html, body {
   font-size: 20px;
   font-weight: 500;
   font-style: italic;
-  color: #fff;
+  color: #e8e4dc;
 }
 .players-left .player-boost-num { right: 16px; }
 .players-right .player-boost-num { left: 16px; }
@@ -354,7 +355,7 @@ html, body {
   position: absolute;
   top: 0; left: 0;
   height: 7px;
-  background: #fff;
+  background: #e8e4dc;
   z-index: 2;
 }
 
@@ -366,7 +367,7 @@ html, body {
   font-size: 26px;
   font-weight: 900;
   font-style: italic;
-  color: #fff;
+  color: #0d0d0d;
   z-index: 2;
   text-transform: uppercase;
 }
@@ -523,7 +524,7 @@ html, body {
   align-items: center;
 }
 .goal-scorer {
-  font-size: 100px;
+  font-size: 80px;
   font-weight: 900;
   font-style: italic;
   color: #fff;
@@ -552,7 +553,7 @@ html, body {
 .sb-bg {
   position: absolute;
   inset: 0;
-  background: url('/assets/podium-bg.png') center / cover no-repeat;
+  background: url('/assets/podium-full.png') center / cover no-repeat;
   display: flex;
   flex-direction: column;
   padding-top: 160px; /* Room for the scoreboard */
@@ -565,24 +566,24 @@ html, body {
   display: flex; 
   align-items: stretch; 
   padding: 70px 30px 20px; 
-  background: rgba(0,0,0,0.5); 
+  background: rgba(0,0,0,0); 
   border-radius: 4px;
   width: 1700px;
   height: 700px;
   margin: auto;
 }
 .sb-players { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.sb-player-names-blue { display: flex; justify-content: space-around; padding-bottom: 6px; border-bottom: 2px solid #055fdb; }
-.sb-player-names-orange { display: flex; justify-content: space-around; padding-bottom: 6px; border-bottom: 2px solid #e97139; }
+.sb-player-names-blue { display: flex; justify-content: space-around; padding-bottom: 6px; border-bottom: 2px solid #cc0000; }
+.sb-player-names-orange { display: flex; justify-content: space-around; padding-bottom: 6px; border-bottom: 2px solid #f2f0eb; }
 .sb-pname { position: relative; font-size: 34px; font-weight: 800; font-style: italic; color: #fff; text-transform: uppercase; text-align: center; flex: 1; white-space: nowrap; padding-top: 4px; }
-.sb-player-names-blue .mvp-player { color: #055fdb; }
-.sb-player-names-orange .mvp-player { color: #e97139; }
+.sb-player-names-blue .mvp-player { color: #cc0000; }
+.sb-player-names-orange .mvp-player { color: #f2f0eb; }
 .mvp-icon { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); width: 56px; height: 56px; margin-bottom: 1px; }
 .sb-stat-rows { flex: 1; display: flex; flex-direction: column; justify-content: space-around; padding-top: 8px; }
 .sb-stat-row { display: flex; justify-content: space-around; align-items: center; }
 .sb-stat-val { font-size: 42px; font-weight: 500; font-style: italic; color: #fff; text-align: center; flex: 1; line-height: 1.2; }
-.sb-players-blue .mvp-stat { color: #055fdb; }
-.sb-players-orange .mvp-stat { color: #e97139; }
+.sb-players-blue .mvp-stat { color: #cc0000; }
+.sb-players-orange .mvp-stat { color: #f2f0eb; }
 .sb-stat-labels { flex-shrink: 0; width: 220px; display: flex; flex-direction: column; padding-top: 34px; }
 .sb-stat-group { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .sb-stat-label { font-size: 28px; font-style: italic; font-weight: 800; color: rgba(255,255,255,0.45); text-transform: uppercase; }
@@ -608,5 +609,5 @@ html, body {
   z-index: 3;
   transition: left 1s ease-in-out;
 }
-.bar-fill-blue { width: 50%; height: 100%; background: #055fdb; transition: width 1s ease-in-out; }
-.bar-fill-orange { width: 50%; height: 100%; background: #e97139; transition: width 1s ease-in-out; }
+.bar-fill-blue { width: 50%; height: 100%; background: #cc0000; transition: width 1s ease-in-out; }
+.bar-fill-orange { width: 50%; height: 100%; background: #f2f0eb; transition: width 1s ease-in-out; }

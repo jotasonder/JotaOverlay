@@ -101,6 +101,9 @@ function applyState(data) {
   syncFacecamRows(data.players || [], data.facecams || [], true);
   renderSavedFacecams(data.facecams || []);
 
+  // Overlay assets
+  syncAssets(data.assets || {});
+
   // RL status
   el('rl-status').textContent = data.rlConnected
     ? '🎮 RL: Connected'
@@ -171,6 +174,8 @@ function applyState(data) {
       });
     }
   }
+
+
   // Version
   if (data.version) {
     const verEl = el('app-version');
@@ -1060,6 +1065,131 @@ el('btn-apply-all-facecams').addEventListener('click', () => {
   });
   if (saved === 0) alert('No facecams to apply — fill in at least one URL.');
 });
+
+// ── Overlay Assets tab ────────────────────────────────────────────────────
+// The panel loads over file://, so overridden assets (served from the HTTP
+// server on :3000) need an absolute URL. Bundled defaults stay relative.
+const OVERLAY_ORIGIN = 'http://localhost:3000';
+
+const OVERLAY_ASSETS = [
+  { title: '🖥️ Scoreboard', items: [
+    { file: 'scoreboard.png',          label: 'HUD Scoreboard' },
+    { file: 'podium-scoreboard2.png',  label: 'End-match Scoreboard' },
+    { file: 'podium-full.png',         label: 'End-match Background' }
+  ]},
+  { title: '👤 Players', items: [
+    { file: 'player.png',              label: 'Player Row' },
+    { file: 'player-blue.png',         label: 'Player Row — Blue Active' },
+    { file: 'player-orange.png',       label: 'Player Row — Orange Active' },
+    { file: 'player-blue-bot.png',     label: 'Bottom Bar — Blue' },
+    { file: 'player-orange-bot.png',   label: 'Bottom Bar — Orange' }
+  ]},
+  { title: '⛽ Boost', items: [
+    { file: 'boost.png',               label: 'Boost Ring' },
+    { file: 'boost-tags.png',          label: 'Boost Ring Overlay' }
+  ]},
+  { title: '🥅 Goal', items: [
+    { file: 'goal-blue-2.png',         label: 'Goal Banner — Blue' },
+    { file: 'goal-orange-2.png',       label: 'Goal Banner — Orange' }
+  ]},
+  { title: '✨ Other', items: [
+    { file: 'banner.png',              label: 'Sponsor Banner Frame' },
+    { file: 'mvp.png',                 label: 'MVP Icon' }
+  ]}
+];
+
+function assetId(file) { return file.replace(/[^a-zA-Z0-9]/g, '-'); }
+
+function initAssetsTab() {
+  const root = el('assets-groups');
+  if (!root) return;
+  root.innerHTML = '';   // guard against double-build
+
+  OVERLAY_ASSETS.forEach(group => {
+    const sec = document.createElement('section');
+    sec.className = 'section';
+
+    const h = document.createElement('h3');
+    h.className = 'section-title';
+    h.textContent = group.title;
+    sec.appendChild(h);
+
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:15px;';
+
+    group.items.forEach(it => {
+      const card = document.createElement('div');
+      card.style.cssText = 'background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:6px;';
+
+      const img = document.createElement('img');
+      img.id = `asset-preview-${assetId(it.file)}`;
+      img.src = `../assets/${it.file}`;
+      img.style.cssText = 'height:70px; width:100%; object-fit:contain; background:rgba(0,0,0,0.4); border-radius:4px;';
+
+      const label = document.createElement('div');
+      label.textContent = it.label;
+      label.style.cssText = 'font-size:12px; font-weight:600; color:#e0e0e0;';
+
+      const fname = document.createElement('div');
+      fname.textContent = it.file;
+      fname.style.cssText = 'font-size:10px; opacity:0.45;';
+
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex; gap:6px; margin-top:auto; padding-top:4px;';
+
+      const inputId = `asset-input-${assetId(it.file)}`;
+
+      const pick = document.createElement('label');
+      pick.className = 'btn btn-primary btn-sm';
+      pick.setAttribute('for', inputId);
+      pick.textContent = '📁 Select';
+      pick.style.cssText = 'flex:1; cursor:pointer; text-align:center;';
+
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.id = inputId;
+      input.accept = 'image/*';
+      input.style.display = 'none';
+      input.addEventListener('change', async (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        send('set_asset', { name: it.file, image: await fileToBase64(f) });
+        e.target.value = '';
+      });
+
+      const reset = document.createElement('button');
+      reset.className = 'btn btn-ghost btn-sm';
+      reset.textContent = '🔄';
+      reset.title = 'Reset to default';
+      reset.addEventListener('click', () => send('set_asset', { name: it.file, image: null }));
+
+      row.appendChild(pick);
+      row.appendChild(input);
+      row.appendChild(reset);
+
+      card.appendChild(img);
+      card.appendChild(label);
+      card.appendChild(fname);
+      card.appendChild(row);
+      grid.appendChild(card);
+    });
+
+    sec.appendChild(grid);
+    root.appendChild(sec);
+  });
+}
+
+function syncAssets(assets) {
+  OVERLAY_ASSETS.forEach(g => g.items.forEach(it => {
+    const img = el(`asset-preview-${assetId(it.file)}`);
+    if (!img) return;
+    img.src = assets[it.file]
+      ? OVERLAY_ORIGIN + assets[it.file]
+      : `../assets/${it.file}`;
+  }));
+}
+
+initAssetsTab();
 
 // ── RL status ─────────────────────────────────────────────────────────────
 // (Updated via full_state)
